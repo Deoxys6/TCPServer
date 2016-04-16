@@ -11,12 +11,15 @@ namespace ServerTest
 {
     class Program
     {
+        static int clientCount = 0;
+        static MusicReader reader = new MusicReader();
         static void Main(string[] args)
         {
             Console.WriteLine(LocalIPAddress());
+            //create the object
             AsynchronousSocketListener.StartListening();
-            //create 
-            MusicReader reader = new MusicReader();
+            Console.WriteLine("Test");
+
         }
 
         public class AsynchronousSocketListener
@@ -86,6 +89,7 @@ namespace ServerTest
                 StateObject state = new StateObject();
                 state.workSocket = handler;
                 handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+                clientCount++;
             }
 
             public static void ReadCallback(IAsyncResult ar)
@@ -104,15 +108,15 @@ namespace ServerTest
                 {
                     // There  might be more data, so store the data received so far.
                     state.sb.Append(Encoding.ASCII.GetString(
-                        state.buffer, 0, bytesRead));
+                    state.buffer, 0, bytesRead));
 
-                    content = state.sb.ToString();
+                    content = reader.GetAllInfo(clientCount).ToString();
                     
-                        // All the data has been read from the 
-                        // client. Display it on the console.
-                        Console.WriteLine("Message:{0}",content);
-                        // Echo the data back to the client.
-                        Send(handler, content);
+                    // All the data has been read from the 
+                    // client. Display it on the console.
+                    Console.WriteLine("Message:{0}",content);
+                    // Echo the data back to the client.
+                    Send(handler, content);
                     
                 }
             }

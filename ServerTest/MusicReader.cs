@@ -21,15 +21,21 @@ public class MusicReader
                                                                                                  
     //This is the duration of the measure
     static int durationOfAMeasure = 1800;
+    
+    //create the array for storing the 2d arrays 
+    private List<int[,]> _allInfo = new List<int[,]>();
+
+    //method to get the multi array at index
+    public int[,] GetAllInfo(int index)
+    {
+        return _allInfo[index];
+    }
 
     //constructor
     public MusicReader()
     {
         //get all the files in the Music Folder
         String[] files = Directory.GetFiles(Path.Combine("..", "..", "Music"));
-        Console.WriteLine("Here are the files in the Music Folder:");
-        //create the array for storing the 2d arrays 
-        List<int[ , ]> allInfo = new List<int[ , ]>();
         foreach (string file in files)
         {
             Console.WriteLine(file);
@@ -206,7 +212,7 @@ public class MusicReader
                     //Assign the frequency of the note
                     theActualArrayThatIsNeededToBePlayed[0, x] = notesAndFrequencyArray[noteType, octaveRange];
                 }
-                allInfo.Add((theActualArrayThatIsNeededToBePlayed));
+                _allInfo.Add((theActualArrayThatIsNeededToBePlayed));
             }
         }
     }
