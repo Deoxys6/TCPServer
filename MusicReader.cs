@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Collections.Generic;
 
 public class MusicReader
 {
@@ -20,18 +22,27 @@ public class MusicReader
     //This is the duration of the measure
     static int durationOfAMeasure = 1800;
 
-    //default constructor
+    //constructor
     public MusicReader()
-	{
-	//}
 
-   // public static Int32[][] identifyMusic(String filePath)
-    //{
+    {
+        //get all the files in the Music Folder
+        String[] files = Directory.GetFiles();
+        Console.WriteLine("Here are the files in the Music Folder:");
+        foreach (string file in files)
+        {
+            Console.WriteLine(file);
+        } 
+
         int noteType = 13;
         int octaveRange = 13;
         //Make its own method for reading the file and converting the things
         //Read the File for the translated Music 
+        
+        //show all the files in the Music Folder
+                
         FileStream outFile = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
         StreamReader reader = new StreamReader(outFile);
         //Array for the contents of the file per line
         String line;
