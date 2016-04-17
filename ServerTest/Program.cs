@@ -6,7 +6,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 namespace ServerTest
 {
     class Program
@@ -94,7 +95,7 @@ namespace ServerTest
 
             public static void ReadCallback(IAsyncResult ar)
             {
-                String content = String.Empty;
+                
 
                 // Retrieve the state object and the handler socket
                 // from the asynchronous state object.
@@ -107,17 +108,20 @@ namespace ServerTest
                 if (bytesRead > 0)
                 {
                     // There  might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(
-                    state.buffer, 0, bytesRead));
+                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
 
-                    content = reader.GetAllInfo(clientCount).ToString();
-                    
-                    // All the data has been read from the 
-                    // client. Display it on the console.
-                    Console.WriteLine("Message:{0}",content);
-                    // Echo the data back to the client.
-                    Send(handler, content);
-                    
+
+                    int[,]rawArray = reader.GetAllInfo(clientCount);
+                    var serialize = new BinaryFormatter();
+                    //serialize the conents to send to client
+                    using (var ms = new MemoryStream())
+                    {
+                        serialize.Serialize(ms, rawArray);
+                        var bytes = ms.ToArray();
+                        Console.WriteLine("Message:{0}", bytes);
+                        // Echo the data back to the client.
+                        Send(handler,System.Text.Encoding.Default.GetString(bytes));
+                    }                    
                 }
             }
 
