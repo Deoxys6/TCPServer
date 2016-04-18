@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using Music;
 namespace ServerTest
 {
     class Program
@@ -20,7 +21,6 @@ namespace ServerTest
             //create the object
             AsynchronousSocketListener.StartListening();
             Console.WriteLine("Test");
-
         }
 
         public class AsynchronousSocketListener
@@ -95,7 +95,7 @@ namespace ServerTest
 
             public static void ReadCallback(IAsyncResult ar)
             {
-                
+
 
                 // Retrieve the state object and the handler socket
                 // from the asynchronous state object.
@@ -103,32 +103,59 @@ namespace ServerTest
                 Socket handler = state.workSocket;
 
                 // Read data from the client socket. 
-                int bytesRead = handler.EndReceive(ar);
+                try
+                { 
 
-                if (bytesRead > 0)
-                {
-                    // There  might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                    int bytesRead = handler.EndReceive(ar);
 
-
-                    int[,]rawArray = reader.GetAllInfo(clientCount);
-                    var serialize = new BinaryFormatter();
-                    //serialize the conents to send to client
-                    using (var ms = new MemoryStream())
+                    if (bytesRead > 0)
                     {
-                        serialize.Serialize(ms, rawArray);
-                        var bytes = ms.ToArray();
-                        Console.WriteLine("Message:{0}", bytes);
-                        // Echo the data back to the client.
-                        Send(handler,System.Text.Encoding.Default.GetString(bytes));
-                    }                    
+                        // There  might be more data, so store the data received so far.
+                        state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                        Boolean isValidSong = false;
+                        do
+                        {
+                            try
+                            {
+                                Console.WriteLine("What song do you want to send?");
+                                int song;
+                                Int32.TryParse(Console.ReadLine(), out song);
+                                //Int32 song = Int32.Parse(Console.ReadLine().Trim());
+                                var songToSend = reader.songList[song];
+
+                                var serialize = new BinaryFormatter();
+                                //serialize the conents to send to client
+                                using (var ms = new MemoryStream())
+                                {
+                                    serialize.Serialize(ms, songToSend);
+                                    var bytes = ms.ToArray();
+                                    var test = Encoding.ASCII.GetString(bytes);
+                                    //Console.WriteLine("Message:{0}", test);
+                                    //Console.WriteLine("as ints {0}", string.Join(" ", bytes));
+                                    // Echo the data back to the client.
+                                    Send(handler, bytes);
+                                }
+                                isValidSong = true;
+                            }
+
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("Try Again");
+                            }
+                        } while (!isValidSong);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Someone disconneted");
                 }
             }
 
-            private static void Send(Socket handler, String data)
+            private static void Send(Socket handler, byte[] byteData)
             {
                 // Convert the string data to byte data using ASCII encoding.
-                byte[] byteData = Encoding.ASCII.GetBytes(data);
+                //byte[] byteData = Encoding.ASCII.GetBytes(data);
 
                 // Begin sending the data to the remote device.
                 handler.BeginSend(byteData, 0, byteData.Length, 0,

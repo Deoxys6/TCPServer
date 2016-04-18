@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-
+using Music;
 public class MusicReader
 {
     //Row is first, and note, Colum is Octave range and second
@@ -23,21 +23,18 @@ public class MusicReader
     static int durationOfAMeasure = 1800;
     
     //create the array for storing the 2d arrays 
-    private List<int[,]> _allInfo = new List<int[,]>();
+    public List<Song> songList { set; get; } = new List<Song>();
 
-    //method to get the multi array at index
-    public int[,] GetAllInfo(int index)
-    {
-        return _allInfo[index];
-    }
 
     //constructor
     public MusicReader()
     {
+        
         //get all the files in the Music Folder
         String[] files = Directory.GetFiles(Path.Combine("..", "..", "Music"));
         foreach (string file in files)
         {
+            Song song = new Song();
             Console.WriteLine(file);
             
             // Boolean fileSelected 
@@ -48,7 +45,7 @@ public class MusicReader
 
             //show all the files in the Music Folder
 
-            FileStream outFile = new FileStream(files[0], FileMode.Open, FileAccess.Read);
+            FileStream outFile = new FileStream(file, FileMode.Open, FileAccess.Read);
             StreamReader reader = new StreamReader(outFile);
             //Array for the contents of the file per line
             String line;
@@ -212,8 +209,15 @@ public class MusicReader
                     //Assign the frequency of the note
                     theActualArrayThatIsNeededToBePlayed[0, x] = notesAndFrequencyArray[noteType, octaveRange];
                 }
-                _allInfo.Add((theActualArrayThatIsNeededToBePlayed));
+                //Console.WriteLine(theActualArrayThatIsNeededToBePlayed[0, x].ToString() + " " + theActualArrayThatIsNeededToBePlayed[1, x].ToString());
+                Note note = new Note(theActualArrayThatIsNeededToBePlayed[0, x], theActualArrayThatIsNeededToBePlayed[1, x]);
+                song.noteList.Add(note);
+                
+                
             }
+            
+            songList.Add(song);
+            Console.WriteLine(String.Join(", ",songList));
         }
     }
 }
